@@ -12,17 +12,17 @@ import (
 )
 
 func main() {
-    // initialize ui
-    if err := ui.Init(); err != nil {
-        log.Fatalf("failed to initialize termui: %v", err)
-    }
-
     // capturing stdin
     scanner:= bufio.NewScanner(os.Stdin)
     var stdin []string
     for scanner.Scan() {
         input := scanner.Text()
         stdin = append(stdin,input)
+    }
+
+    // initialize ui
+    if err := ui.Init(); err != nil {
+        log.Fatalf("failed to initialize termui: %v", err)
     }
 
     // creating list object

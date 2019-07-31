@@ -4,6 +4,7 @@ import (
     "os"
     "log"
     "fmt"
+    "strconv"
     "bufio"
     "sort"
 
@@ -25,20 +26,27 @@ func main() {
         log.Fatalf("failed to initialize termui: %v", err)
     }
 
+    // getting term dimensions
+    termWidth, termHeight := ui.TerminalDimensions()
+
     // creating list object
     list := widgets.NewList()
     list.TextStyle = ui.NewStyle(6)
     list.Title = "Select using V, return selected using <Enter>"
-    list.WrapText = false
-    width, height := ui.TerminalDimensions()
-    list.SetRect(0, 0, width, height)
+    list.WrapText = true
     list.Rows = stdin
+    listHeight := termHeight-1
+    list.SetRect(0, 0, termWidth, listHeight)
+
+    // creating bottom function bar
+    bar := widgets.NewParagraph()
+    bar.TextStyle = ui.NewStyle(6)
+    bar.Text = "0 | "
+    bar.Border = false
+    bar.SetRect(0, listHeight, termWidth, termHeight)
 
     // creating output map
     output := make(map[int]string)
-
-    // initial render
-    ui.Render(list)
 
     // render loop
     previousKey := ""
@@ -56,24 +64,33 @@ func main() {
             // resizing
             case "<Resize>":
                 payload := e.Payload.(ui.Resize)
-                list.SetRect(0, 0, payload.Width, payload.Height)
+                termWidth := payload.Width
+                termHeight := payload.Height
+                list.SetRect(0, 0, termWidth, termHeight-1)
+                bar.SetRect(0, termHeight-1, termWidth, termHeight)
                 ui.Clear()
-                ui.Render(list)
+                ui.Render(list, bar)
 
             // scrolling
             case "j", "<Down>":
                 list.ScrollDown()
+                bar.Text = strconv.Itoa(list.SelectedRow) + " |"
             case "k", "<Up>":
                 list.ScrollUp()
+                bar.Text = strconv.Itoa(list.SelectedRow) + " |"
             case "g":
                 if previousKey == "g" {
                     list.ScrollTop()
+                    bar.Text = strconv.Itoa(list.SelectedRow) + " |"
+                } else {
+                    bar.Text = strconv.Itoa(list.SelectedRow) + " | g"
                 }
             case "G":
                 list.ScrollBottom()
+                bar.Text = strconv.Itoa(list.SelectedRow) + " |"
 
             // selecting lines
-            case "V":
+            case "V", "<Space>":
                 if _, there := output[list.SelectedRow]; !there {
                     selected := list.Rows[list.SelectedRow]
                     list.Rows[list.SelectedRow] = "* " + selected
@@ -99,7 +116,7 @@ func main() {
                 previousKey = e.ID
             }
 
-            ui.Render(list)
+            ui.Render(list, bar)
         }
 
     // close GUI

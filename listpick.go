@@ -18,6 +18,9 @@ func main() {
     var stdin []string
     for scanner.Scan() {
         input := scanner.Text()
+        if len(input) == 0 {
+            input = " "
+        }
         stdin = append(stdin,input)
     }
 
@@ -31,7 +34,8 @@ func main() {
 
     // creating list object
     list := widgets.NewList()
-    list.TextStyle = ui.NewStyle(6)
+    list.TextStyle = ui.NewStyle(ui.ColorCyan)
+    list.SelectedRowStyle = ui.NewStyle(ui.ColorBlack, ui.ColorWhite)
     list.Title = "Select using V, return selected using <Enter>"
     list.WrapText = true
     list.Rows = stdin
@@ -40,7 +44,7 @@ func main() {
 
     // creating bottom function bar
     bar := widgets.NewParagraph()
-    bar.TextStyle = ui.NewStyle(6)
+    bar.TextStyle = ui.NewStyle(ui.ColorCyan)
     bar.Text = "0 | "
     bar.Border = false
     bar.SetRect(0, listHeight, termWidth, termHeight)

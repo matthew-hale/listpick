@@ -94,7 +94,7 @@ func main() {
                 bar.Text = strconv.Itoa(list.SelectedRow) + " |"
 
             // selecting lines
-            case "V", "<Space>":
+            case "V", "v", "<Space>":
                 if _, there := output[list.SelectedRow]; !there {
                     selected := list.Rows[list.SelectedRow]
                     list.Rows[list.SelectedRow] = "* " + selected
